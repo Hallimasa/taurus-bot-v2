@@ -1,7 +1,7 @@
 import { DISCORD_EVENTS } from 'src/tokens';
 
 export const DiscordEvent = (eventName: string): MethodDecorator => {
-  return (target, _, descriptor: PropertyDescriptor) => {
+  return (target, propertyKey, descriptor: PropertyDescriptor) => {
     const events = Reflect.getMetadata(DISCORD_EVENTS, target) || [];
 
     Reflect.defineMetadata(
@@ -10,7 +10,7 @@ export const DiscordEvent = (eventName: string): MethodDecorator => {
         ...events,
         {
           name: eventName,
-          descriptor: descriptor.value?.bind(target)
+          descriptor: descriptor.value
         }
       ],
       target

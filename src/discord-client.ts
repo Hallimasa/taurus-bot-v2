@@ -41,10 +41,8 @@ export class DiscordClient {
       .catch((e) => this.logger.error(e.message));
   }
 
-  async loadEvents(events: DiscordEvent[]) {
-    events.forEach((event) => {
-      this.client.on(event.name, event.descriptor);
-    });
+  async register(event: DiscordEvent) {
+    this.client.on(event.name, event.descriptor);
   }
 
   close(server: Client): Promise<void> {
