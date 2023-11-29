@@ -1,9 +1,9 @@
 import { HttpModule } from '@nestjs/axios';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PrismaService } from './prisma/prisma.service';
-import { WarframeService } from './warframe/warframe.service';
 import { DiscordModule } from './discord/discord.module';
+import { WF_API_URL } from './environment-tokens';
+import { WarframeService } from './warframe/warframe.service';
 
 @Global()
 @Module({
@@ -15,7 +15,7 @@ import { DiscordModule } from './discord/discord.module';
     HttpModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        baseURL: configService.get('WF_API_URL'),
+        baseURL: configService.get(WF_API_URL),
         headers: {
           'Content-Type': 'application/json'
         },
@@ -27,7 +27,7 @@ import { DiscordModule } from './discord/discord.module';
     DiscordModule
   ],
   controllers: [],
-  providers: [PrismaService, WarframeService],
-  exports: [PrismaService, WarframeService]
+  providers: [WarframeService],
+  exports: [WarframeService]
 })
 export class AppModule {}

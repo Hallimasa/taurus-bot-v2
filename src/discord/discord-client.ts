@@ -1,6 +1,7 @@
 import { Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ButtonInteraction, Client, IntentsBitField } from 'discord.js';
+import { DISCORD_EVENTS_DEBUG, DISCORD_TOKEN } from 'src/environment-tokens';
 import { DiscordEvent } from 'src/interfaces/discord-event.interface';
 import { DiscordInteraction } from 'src/interfaces/discord-interaction.interface';
 
@@ -33,13 +34,8 @@ export class DiscordClient {
     }
 
     await this.client
-      .login(this.configService.get('DISCORD_TOKEN'))
+      .login(this.configService.get(DISCORD_TOKEN))
       .then(() => {
-        this.client.user.setUsername('Taurus');
-        this.client.user.setActivity({
-          name: `${this.configService.get('BOT_PREFIX')} help`
-        });
-
         this.logger.log(`✅ ${this.client.user.tag} is online!`);
       })
       .catch((e) => this.logger.error(e.message));
@@ -54,7 +50,7 @@ export class DiscordClient {
       }
 
       this.client.on(event.name, (...args) => {
-        if (this.configService.get('DISCORD_EVENTS_DEBUG') === 'true') {
+        if (this.configService.get(DISCORD_EVENTS_DEBUG) === 'true') {
           this.logger.debug(`Event [${event.name}] called`);
         }
 

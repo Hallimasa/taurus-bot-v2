@@ -3,6 +3,7 @@ import { Message } from 'discord.js';
 import { Event } from 'src/decorators/event.decorator';
 import { CommandsService } from './commands.service';
 import { ConfigService } from '@nestjs/config';
+import { BOT_PREFIX } from 'src/environment-tokens';
 
 @Injectable()
 export class EventsService {
@@ -18,7 +19,7 @@ export class EventsService {
     if (msg.author.id === msg.client.user.id) return;
     const content = msg.content.split(' ');
 
-    if (content[0] !== this.configService.get('BOT_PREFIX')) return;
+    if (content[0] !== this.configService.get(BOT_PREFIX)) return;
     if (!content[1]) return;
 
     try {
