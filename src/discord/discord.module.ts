@@ -7,11 +7,16 @@ import { EventsService } from './events.service';
 import { InteractionsService } from './interactions.service';
 import { DiscordInteraction } from 'src/interfaces/discord-interaction.interface';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigService } from '@nestjs/config';
+import { MAX_CACHE_TIME } from 'src/environment-tokens';
 
 @Module({
   imports: [
-    CacheModule.register({
-      ttl: 0
+    CacheModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        ttl: +config.get(MAX_CACHE_TIME)
+      })
     })
   ],
   providers: [

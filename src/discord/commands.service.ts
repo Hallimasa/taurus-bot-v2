@@ -1,24 +1,24 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import { ButtonStyle, ComponentType, Message } from 'discord.js';
 import { Command, RegisteredCommand } from 'src/decorators/command.decorator';
+import { MAX_CACHE_TIME } from 'src/environment-tokens';
 import { BOT_COMMAND } from 'src/tokens';
-import { capitalize } from 'src/utils/capitalize';
-import {
-  adaptColor,
-  adaptModCompatibility,
-  adaptModType,
-  adaptRarity
-} from 'src/utils/wf-mod-compatibility-interpolation';
 import { WarframeService } from 'src/warframe/warframe.service';
+import ModBuilder from './components/mod-builder';
+import WarframeBuilder from './components/warframe-builder';
 
 @Injectable()
 export class CommandsService {
   @Inject(CACHE_MANAGER)
   private readonly cache: Cache;
 
-  constructor(private warframeService: WarframeService) {}
+  constructor(
+    private warframeService: WarframeService,
+    private configService: ConfigService
+  ) {}
 
   handle(command: string) {
     const actions = (Reflect.getMetadata(BOT_COMMAND, this) ||
@@ -42,35 +42,9 @@ export class CommandsService {
 
       const mod = await this.warframeService.fetchMod(modName);
 
-      message.edit({
+      await message.edit({
         content: '',
-        embeds: [
-          {
-            title: mod.name,
-            color: adaptColor(mod),
-            description: `
-            Tipo: ${capitalize(adaptModType(mod.type))}
-            Compatibilidade: ${capitalize(
-              adaptModCompatibility(mod.compatName)
-            )}
-            Aprimoramentos: ${mod.fusionLimit}
-            Polaridade: ${capitalize(mod.polarity)}
-            Custo: ${mod.baseDrain}
-            `,
-            image: {
-              url: mod.wikiaThumbnail,
-              height: 120
-            },
-            url: mod.wikiaUrl,
-            footer: {
-              text: `
-              Este é um mod ${adaptRarity(mod.rarity).toLowerCase()} e ${
-                mod.tradable ? 'comercializável' : 'não comercializável'
-              }
-              `
-            }
-          }
-        ],
+        embeds: [ModBuilder(mod)],
         components: [
           {
             type: ComponentType.ActionRow,
@@ -78,28 +52,66 @@ export class CommandsService {
               {
                 type: ComponentType.Button,
                 style: ButtonStyle.Secondary,
-                custom_id: 'drop-located-info',
-                label: 'Ver drops'
+                custom_id: 'mod-drop-info',
+                label: 'Onde dropar'
               }
             ]
           }
         ]
       });
 
-      const cacheKey = `drop-located-info:${message.id}`;
+      this.cache.set(message.id, mod);
 
-      this.cache.set(cacheKey, mod);
+      setTimeout(() => {
+        message.edit({
+          components: []
+        });
+      }, +this.configService.get(MAX_CACHE_TIME));
+    } catch (e) {
+      msg.reply(e.message);
+    }
+  }
 
-      setTimeout(
-        () => {
-          message.edit({
-            components: []
-          });
-
-          this.cache.del(cacheKey);
-        },
-        1000 * 60 * 2
+  @Command('warframe', 'wf', 'frame')
+  async fetchWarframe(msg: Message, wf: string) {
+    try {
+      const message = await msg.channel.send(
+        'Buscando informações sobre este Warframe no codex...'
       );
+
+      const warframe = await this.warframeService.fetchWaframe(wf);
+
+      await message.edit({
+        content: '',
+        embeds: [WarframeBuilder(warframe)],
+        components: [
+          {
+            type: ComponentType.ActionRow,
+            components: [
+              {
+                type: ComponentType.Button,
+                style: ButtonStyle.Secondary,
+                label: 'Habilidades',
+                custom_id: 'show-warframe-habilities'
+              },
+              {
+                type: ComponentType.Button,
+                style: ButtonStyle.Secondary,
+                label: 'Construção',
+                custom_id: 'show-warframe-components'
+              }
+            ]
+          }
+        ]
+      });
+
+      this.cache.set(message.id, warframe);
+
+      setTimeout(() => {
+        message.edit({
+          components: []
+        });
+      }, +this.configService.get(MAX_CACHE_TIME));
     } catch (e) {
       msg.reply(e.message);
     }

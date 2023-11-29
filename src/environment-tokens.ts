@@ -3,3 +3,4 @@ export const WF_API_URL = 'WF_API_URL';
 export const WF_DEFAULT_PLATFORM = 'WF_DEFAULT_PLATFORM';
 export const DISCORD_EVENTS_DEBUG = 'DISCORD_EVENTS_DEBUG';
 export const BOT_PREFIX = 'BOT_PREFIX';
+export const MAX_CACHE_TIME = 'MAX_CACHE_TIME';
