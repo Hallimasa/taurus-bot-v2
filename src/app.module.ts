@@ -1,13 +1,9 @@
 import { HttpModule } from '@nestjs/axios';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { DiscordClient, DiscordEvent } from './discord-client';
-import { DiscordService } from './discord/discord.service';
 import { PrismaService } from './prisma/prisma.service';
-import { DISCORD_EVENTS } from './tokens';
 import { WarframeService } from './warframe/warframe.service';
+import { DiscordModule } from './discord/discord.module';
 
 @Global()
 @Module({
@@ -22,38 +18,16 @@ import { WarframeService } from './warframe/warframe.service';
         baseURL: configService.get('WF_API_URL'),
         headers: {
           'Content-Type': 'application/json'
+        },
+        params: {
+          language: 'pt'
         }
       })
-    })
+    }),
+    DiscordModule
   ],
-  controllers: [AppController],
-  providers: [
-    AppService,
-    PrismaService,
-    WarframeService,
-    {
-      provide: DiscordClient,
-      useClass: DiscordClient
-    },
-    DiscordService
-  ],
+  controllers: [],
+  providers: [PrismaService, WarframeService],
   exports: [PrismaService, WarframeService]
 })
-export class AppModule {
-  constructor(
-    private readonly discordService: DiscordService,
-    private readonly discordClient: DiscordClient
-  ) {
-    const events = Reflect.getMetadata(
-      DISCORD_EVENTS,
-      this.discordService
-    ) as DiscordEvent[];
-
-    events.forEach((event) => {
-      this.discordClient.register({
-        ...event,
-        descriptor: event.descriptor?.bind(this.discordService)
-      });
-    });
-  }
-}
+export class AppModule {}

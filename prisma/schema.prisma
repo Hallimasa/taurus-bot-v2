@@ -13,3 +13,13 @@ datasource db {
 model WarframeBuild {
   id String @id @default(cuid())
 }
+
+model Guild {
+  id                      String  @id
+  cetusAlertsChannel      String?
+  gameAlertsChannel       String?
+  archonHuntAlertsChannel String?
+  orbVallisAlertsChannel  String?
+  baroKiteerAlertsChannel String?
+  nighwaveAlertsChannel   String?
+}

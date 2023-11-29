@@ -1,9 +1,9 @@
+import { ClientEvents } from 'discord.js';
 import { DISCORD_EVENTS } from 'src/tokens';
 
-export const DiscordEvent = (eventName: string): MethodDecorator => {
-  return (target, propertyKey, descriptor: PropertyDescriptor) => {
+export const Event = (eventName: keyof ClientEvents): MethodDecorator => {
+  return (target, _, descriptor: PropertyDescriptor) => {
     const events = Reflect.getMetadata(DISCORD_EVENTS, target) || [];
-
     Reflect.defineMetadata(
       DISCORD_EVENTS,
       [
@@ -15,7 +15,6 @@ export const DiscordEvent = (eventName: string): MethodDecorator => {
       ],
       target
     );
-
     return descriptor;
   };
 };
