@@ -9,7 +9,7 @@ import { WarframeService } from './warframe/warframe.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: '.env.local',
       isGlobal: true
     }),
     HttpModule.registerAsync({
